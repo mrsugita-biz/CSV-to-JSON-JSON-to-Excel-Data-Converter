@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- 1. SEO METADATA -->
+    <title>DataFlow Pro | Secure JSON to CSV & Excel Converter</title>
+    <meta name="description" content="Convert JSON to CSV, Excel & vice versa instantly. 100% free, secure client-side tool. No data uploaded. The safest choice for developers handling sensitive data.">
+    
+    <!-- Fonts: Inter for UI, JetBrains Mono for Code -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons for clean SVG icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Tailwind CSS (CDN for standalone usage) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        slate: {
+                            850: '#151f32',
+                            900: '#0f172a',
+                            950: '#020617',
+                        },
+                        brand: {
+                            DEFAULT: '#6366f1', // Neon Indigo
+                            hover: '#4f46e5',
+                            glow: 'rgba(99, 102, 241, 0.5)'
+                        },
+                        emerald: {
+                            400: '#34d399',
+                            500: '#10b981',
+                        }
+                    },
+                    boxShadow: {
+                        'glow': '0 0 20px -5px rgba(99, 102, 241, 0.4)',
+                        'glow-sm': '0 0 10px -2px rgba(99, 102, 241, 0.3)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- SheetJS -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+
+    <style>
+        /* Custom Scrollbar for Webkit */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569; 
+        }
+
+        /* Animations */
+        @keyframes slideIn {
+            from { transform: translateY(-10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-slide-in {
+            animation: slideIn 0.3s ease-out forwards;
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.2s ease-out forwards;
+        }
+
+        /* Input hidden */
+        input[type="file"] {
+            display: none;
+        }
+
+        /* Glassmorphism */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Custom Dropdown Transition */
+        #dropdownMenu {
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            transform-origin: top center;
+        }
+        #dropdownMenu.hidden {
+            opacity: 0;
+            transform: scale(0.95);
+            pointer-events: none;
+        }
+        #dropdownMenu:not(.hidden) {
+            opacity: 1;
+            transform: scale(1);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-200 font-sans min-h-screen flex flex-col selection:bg-brand selection:text-white">
+
+    <!-- Sticky Header & Top Ad -->
+    <header class="sticky top-0 z-50 glass-panel border-b border-slate-800 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
+            
+            <!-- Logo & Tagline -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-brand rounded-xl flex items-center justify-center shadow-glow-sm">
+                    <i class="ph ph-arrows-left-right text-white text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg tracking-tight text-white leading-none">DataFlow <span class="text-brand">Pro</span></h1>
+                    <p class="text-xs text-slate-400 font-medium mt-1 flex items-center gap-1">
+                        <i class="ph-fill ph-shield-check text-emerald-400"></i> 
+                        100% Secure: Your data never leaves your computer
+                    </p>
+                </div>
+            </div>
+
+            <!-- Top Ad Slot (Sticky) -->
+            <div class="w-full md:w-auto flex-1 max-w-2xl flex justify-center md:justify-end">
+                <div class="ad-banner w-full h-16 md:h-20 bg-slate-900 border border-slate-800 rounded-lg flex items-center justify-center text-slate-600 text-xs font-mono tracking-widest uppercase">
+                    ADSENSE HOLDER - HEADER (STICKY)
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl mx-auto w-full p-4 md:p-6 lg:p-8 flex flex-col gap-6">
+        
+        <!-- Controls Section -->
+        <section class="w-full max-w-4xl mx-auto space-y-4 animate-slide-in">
+            
+            <!-- Mode Selector (CUSTOM UI) -->
+            <div class="relative group" id="customDropdownContainer">
+                <div class="absolute -inset-0.5 bg-gradient-to-r from-brand to-purple-600 rounded-2xl opacity-30 group-hover:opacity-60 transition duration-500 blur"></div>
+                
+                <div class="relative bg-slate-900 rounded-2xl border border-slate-800 shadow-2xl z-20">
+                    <!-- Trigger Button -->
+                    <button id="dropdownTrigger" class="w-full flex items-center justify-between p-4 text-left focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 focus:ring-offset-slate-900 rounded-2xl">
+                        <div class="flex flex-col">
+                            <span class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Conversion Mode</span>
+                            <span id="selectedModeText" class="text-xl font-bold text-white">JSON to CSV</span>
+                        </div>
+                        
+                        <!-- Arrow Trigger Zone -->
+                        <div id="arrowHoverZone" class="w-12 h-12 flex items-center justify-center rounded-xl bg-slate-800 text-brand hover:bg-brand hover:text-white transition-all duration-300 cursor-pointer border border-slate-700 hover:border-brand hover:shadow-glow-sm">
+                            <i class="ph ph-caret-down text-2xl transition-transform duration-300" id="dropdownArrowIcon"></i>
+                        </div>
+                    </button>
+
+                    <!-- Hidden Input to store value for JS logic -->
+                    <input type="hidden" id="conversionType" value="json-to-csv">
+
+                    <!-- Custom Dropdown Menu -->
+                    <!-- mt-1 reduces gap, pt-1 adds visual spacing -->
+                    <div id="dropdownMenu" class="absolute top-full left-0 w-full mt-1 pt-1 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden hidden z-50">
+                        <ul class="py-1">
+                            <li class="option-item px-4 py-3 hover:bg-slate-800 cursor-pointer transition-colors flex items-center gap-3" data-value="json-to-csv">
+                                <i class="ph ph-file-json text-slate-400"></i> 
+                                <span class="font-medium text-slate-300">JSON to CSV</span>
+                            </li>
+                            <li class="option-item px-4 py-3 hover:bg-slate-800 cursor-pointer transition-colors flex items-center gap-3" data-value="csv-to-json">
+                                <i class="ph ph-table text-slate-400"></i> 
+                                <span class="font-medium text-slate-300">CSV to JSON</span>
+                            </li>
+                            <li class="option-item px-4 py-3 hover:bg-slate-800 cursor-pointer transition-colors flex items-center gap-3" data-value="json-to-excel">
+                                <i class="ph ph-microsoft-excel-logo text-slate-400"></i> 
+                                <span class="font-medium text-slate-300">JSON to Excel (.xlsx)</span>
+                            </li>
+                            <li class="option-item px-4 py-3 hover:bg-slate-800 cursor-pointer transition-colors flex items-center gap-3" data-value="excel-to-json">
+                                <i class="ph ph-file-xls text-slate-400"></i> 
+                                <span class="font-medium text-slate-300">Excel (.xlsx) to JSON</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Bar: Upload & Convert -->
+            <div class="flex flex-col sm:flex-row gap-3">
+                <!-- File Upload -->
+                <label class="flex-1 cursor-pointer group relative overflow-hidden rounded-xl bg-slate-800 border border-slate-700 hover:border-slate-500 transition-all duration-300">
+                    <input type="file" id="fileInput" accept=".json,.csv,.xlsx,.xls">
+                    <div class="flex items-center justify-center gap-2 py-3 px-4 text-slate-400 group-hover:text-white transition-colors">
+                        <i class="ph ph-upload-simple text-xl"></i>
+                        <span class="font-medium text-sm" id="fileNameDisplay">Upload File (Optional)</span>
+                    </div>
+                    <div class="absolute bottom-0 left-0 h-0.5 bg-emerald-500 w-0 group-hover:w-full transition-all duration-500"></div>
+                </label>
+
+                <!-- Convert Button -->
+                <button id="convertBtn" class="flex-[2] bg-brand hover:bg-brand-hover text-white font-bold py-3 px-6 rounded-xl shadow-glow hover:shadow-glow-sm hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2">
+                    <i class="ph ph-lightning text-xl"></i>
+                    <span>Convert Now</span>
+                </button>
+            </div>
+
+            <!-- Ad Slot 2 (Below Actions) -->
+            <div class="w-full h-32 bg-slate-900/50 border border-slate-800/50 rounded-xl flex items-center justify-center text-slate-600 text-xs font-mono tracking-widest uppercase">
+                ADSENSE HOLDER - HIGH VISIBILITY RECTANGLE
+            </div>
+        </section>
+
+        <!-- Error Banner (Hidden by default) -->
+        <div id="errorBanner" class="hidden max-w-7xl mx-auto w-full bg-red-500/10 border border-red-500/50 text-red-200 px-4 py-3 rounded-xl flex items-start gap-3 animate-slide-in">
+            <i class="ph ph-warning-circle text-xl mt-0.5"></i>
+            <div>
+                <h4 class="font-bold text-sm">Conversion Error</h4>
+                <p class="text-xs mt-1 opacity-90" id="errorMessage">Something went wrong.</p>
+            </div>
+        </div>
+
+        <!-- Editor Panels -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 min-h-[500px]">
+            
+            <!-- Input Panel -->
+            <div class="flex flex-col gap-2 h-full">
+                <div class="flex items-center justify-between px-1">
+                    <h2 class="text-sm font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                        <i class="ph ph-code text-brand"></i> Input
+                    </h2>
+                    <div class="flex gap-2">
+                        <button id="pasteBtn" class="p-2 text-slate-500 hover:text-white hover:bg-slate-800 rounded-lg transition-colors" title="Paste">
+                            <i class="ph ph-clipboard-text"></i>
+                        </button>
+                        <button id="clearInputBtn" class="p-2 text-slate-500 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors" title="Clear">
+                            <i class="ph ph-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="relative flex-1 bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl group focus-within:border-brand/50 focus-within:ring-1 focus-within:ring-brand/50 transition-all">
+                    <textarea id="inputArea" class="w-full h-full bg-transparent p-4 font-mono text-sm text-slate-300 resize-none outline-none leading-relaxed" placeholder="Paste your data here or upload a file..."></textarea>
+                    
+                    <!-- Empty State Overlay -->
+                    <div id="inputPlaceholder" class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-50">
+                        <div class="text-center">
+                            <i class="ph ph-file-text text-4xl text-slate-700 mb-2"></i>
+                            <p class="text-slate-600 font-mono text-sm">Awaiting Input...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Output Panel -->
+            <div class="flex flex-col gap-2 h-full">
+                <div class="flex items-center justify-between px-1">
+                    <h2 class="text-sm font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                        <i class="ph ph-check-circle text-emerald-400"></i> Output
+                    </h2>
+                    <div class="flex gap-2">
+                        <!-- JSON Tools -->
+                        <button id="formatJsonBtn" class="hidden p-2 text-slate-500 hover:text-white hover:bg-slate-800 rounded-lg transition-colors" title="Prettify JSON">
+                            <i class="ph ph-brackets-curly"></i>
+                        </button>
+                        <button id="minifyJsonBtn" class="hidden p-2 text-slate-500 hover:text-white hover:bg-slate-800 rounded-lg transition-colors" title="Minify JSON">
+                            <i class="ph ph-arrows-in-line-horizontal"></i>
+                        </button>
+                        
+                        <button id="copyOutputBtn" class="px-3 py-1.5 bg-slate-800 hover:bg-emerald-600 text-slate-300 hover:text-white text-xs font-bold rounded-lg transition-all duration-300 flex items-center gap-2 border border-slate-700 hover:border-emerald-500">
+                            <i class="ph ph-copy"></i> <span id="copyText">Copy</span>
+                        </button>
+                        <button id="downloadBtn" class="p-2 text-slate-500 hover:text-white hover:bg-slate-800 rounded-lg transition-colors" title="Download">
+                            <i class="ph ph-download-simple"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="relative flex-1 bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl">
+                    <textarea id="outputArea" readonly class="w-full h-full bg-transparent p-4 font-mono text-sm text-emerald-400/90 resize-none outline-none leading-relaxed" placeholder="Result will appear here..."></textarea>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ========================================== -->
+        <!-- 2. ON-PAGE CONTENT SECTION (SEO OPTIMIZED) -->
+        <!-- ========================================== -->
+        <section class="max-w-7xl mx-auto w-full px-4 pb-12 text-slate-400">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                
+                <!-- Column 1: Introduction -->
+                <div class="md:col-span-2 space-y-6">
+                    <h2 class="text-2xl font-bold text-white">The Most Secure Way to Convert Data Online</h2>
+                    <p class="leading-relaxed">
+                        DataFlow Pro is designed for developers and data analysts who require speed without compromising security. Unlike standard online converters that upload your files to a remote server, our tool performs all conversions locally in your browser using JavaScript. This means your sensitive datasets, customer lists, and financial records never leave your device.
+                    </p>
+                    <p class="leading-relaxed">
+                        Whether you need to <strong>convert JSON to CSV</strong> for database imports, transform spreadsheet data into <strong>JSON APIs</strong>, or generate reports in Excel format, DataFlow Pro handles it instantly with enterprise-grade privacy.
+                    </p>
+
+                    <h3 class="text-xl font-bold text-white mt-8">How to Use DataFlow Pro</h3>
+                    <ol class="list-decimal pl-5 space-y-2 marker:text-brand">
+                        <li><strong>Select Mode:</strong> Choose your conversion type (e.g., JSON to Excel) from the dropdown menu above.</li>
+                        <li><strong>Input Data:</strong> Paste your text directly or upload a file (.json, .csv, .xlsx).</li>
+                        <li><strong>Convert:</strong> Click "Convert Now". Download or copy the result instantly.</li>
+                    </ol>
+                </div>
+
+                <!-- Column 2: Why Client-Side? -->
+                <div class="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl">
+                    <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                        <i class="ph ph-shield-check text-emerald-400"></i> Why Client-Side?
+                    </h3>
+                    <ul class="space-y-4 text-sm">
+                        <li class="flex gap-3">
+                            <div class="mt-1 min-w-[20px] text-brand"><i class="ph-fill ph-check-circle"></i></div>
+                            <div>
+                                <strong class="text-slate-200 block">Zero Data Leakage</strong>
+                                No files are sent to the cloud. Compliance-ready for GDPR, HIPAA, and corporate security policies.
+                            </div>
+                        </li>
+                        <li class="flex gap-3">
+                            <div class="mt-1 min-w-[20px] text-brand"><i class="ph-fill ph-check-circle"></i></div>
+                            <div>
+                                <strong class="text-slate-200 block">Lightning Fast</strong>
+                                No upload or download wait times. Processing happens at the speed of your local CPU.
+                            </div>
+                        </li>
+                        <li class="flex gap-3">
+                            <div class="mt-1 min-w-[20px] text-brand"><i class="ph-fill ph-check-circle"></i></div>
+                            <div>
+                                <strong class="text-slate-200 block">Works Offline</strong>
+                                Once loaded, the tool functions without an internet connection, perfect for secure environments.
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 3. FAQ SECTION (SCHEMA.ORG READY) -->
+        <!-- ========================================== -->
+        <section class="max-w-4xl mx-auto w-full px-4 pb-16">
+            <h2 class="text-2xl font-bold text-white mb-6 text-center">Frequently Asked Questions</h2>
+            
+            <div class="space-y-4" itemscope itemtype="https://schema.org/FAQPage">
+                
+                <!-- Question 1 -->
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+                    <h3 class="text-lg font-semibold text-white mb-2" itemprop="name">Is it safe to convert my data using DataFlow Pro?</h3>
+                    <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+                        <p class="text-slate-400" itemprop="text">
+                            Yes, absolutely. DataFlow Pro is a <strong>100% client-side converter</strong>. We do not have servers that process your files. All conversion logic runs entirely within your web browser using JavaScript, ensuring your data never leaves your computer and is never stored or logged.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Question 2 -->
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+                    <h3 class="text-lg font-semibold text-white mb-2" itemprop="name">Is there a file size limit for conversions?</h3>
+                    <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+                        <p class="text-slate-400" itemprop="text">
+                            Because we do not use a server, there are no arbitrary upload limits (like 5MB or 10MB). The maximum file size is limited only by your computer's available RAM (Random Access Memory) and your browser's capabilities. This allows you to convert significantly larger files than most online tools allow.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Question 3 -->
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+                    <h3 class="text-lg font-semibold text-white mb-2" itemprop="name">How do I open a JSON file in Excel correctly?</h3>
+                    <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+                        <p class="text-slate-400" itemprop="text">
+                            Excel does not natively format JSON files into rows and columns automatically. The easiest method is to use the <strong>JSON to Excel</strong> mode on this tool. Paste your JSON, convert it to .xlsx, and download the file. It will open in Excel perfectly formatted as a table.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Question 4 -->
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+                    <h3 class="text-lg font-semibold text-white mb-2" itemprop="name">What is the difference between CSV and JSON?</h3>
+                    <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+                        <p class="text-slate-400" itemprop="text">
+                            <strong>CSV (Comma Separated Values)</strong> is a flat-file format best suited for simple table data where every row has the exact same columns. <strong>JSON (JavaScript Object Notation)</strong> is a hierarchical format that supports nested structures, arrays, and complex data types. JSON is the standard for web APIs, while CSV is preferred for spreadsheets.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="border-t border-slate-800 py-8 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center text-slate-600 text-sm">
+            <p>&copy; 2023 DataFlow Pro. Client-side processing only.</p>
+        </div>
+    </footer>
+
+    <!-- Application Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Custom Dropdown Logic (FIXED) ---
+            const dropdownTrigger = document.getElementById('dropdownTrigger');
+            const arrowHoverZone = document.getElementById('arrowHoverZone');
+            const dropdownMenu = document.getElementById('dropdownMenu');
+            const dropdownArrowIcon = document.getElementById('dropdownArrowIcon');
+            const selectedModeText = document.getElementById('selectedModeText');
+            const conversionTypeInput = document.getElementById('conversionType');
+            const optionItems = document.querySelectorAll('.option-item');
+            const container = document.getElementById('customDropdownContainer');
+
+            let isMenuOpen = false;
+            let closeTimeout; // Variable to hold the timer
+
+            function toggleMenu(show) {
+                isMenuOpen = show;
+                if (show) {
+                    dropdownMenu.classList.remove('hidden');
+                    dropdownArrowIcon.style.transform = 'rotate(180deg)';
+                } else {
+                    dropdownMenu.classList.add('hidden');
+                    dropdownArrowIcon.style.transform = 'rotate(0deg)';
+                }
+            }
+
+            // Click Trigger
+            dropdownTrigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleMenu(!isMenuOpen);
+            });
+
+            // Hover on Arrow Specifically
+            arrowHoverZone.addEventListener('mouseenter', () => {
+                if (!isMenuOpen) toggleMenu(true);
+            });
+
+            // --- THE FIX: Mouse Leave with Delay ---
+            container.addEventListener('mouseleave', () => {
+                if (isMenuOpen) {
+                    // Set a 200ms timer before closing
+                    closeTimeout = setTimeout(() => {
+                        toggleMenu(false);
+                    }, 200); 
+                }
+            });
+
+            // If mouse re-enters the container (or the menu), clear the timer (don't close)
+            container.addEventListener('mouseenter', () => {
+                clearTimeout(closeTimeout);
+            });
+            
+            // Explicitly handle entering the menu area just in case
+            dropdownMenu.addEventListener('mouseenter', () => {
+                clearTimeout(closeTimeout);
+            });
+
+            // Handle Option Selection
+            optionItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const value = item.getAttribute('data-value');
+                    const text = item.querySelector('span').textContent;
+                    
+                    selectedModeText.textContent = text;
+                    conversionTypeInput.value = value;
+                    toggleMenu(false);
+
+                    // Trigger change event
+                    const event = new Event('change', { bubbles: true });
+                    conversionTypeInput.dispatchEvent(event);
+                });
+            });
+
+            // Close menu when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!container.contains(e.target) && isMenuOpen) {
+                    toggleMenu(false);
+                }
+            });
+
+
+            // --- DOM Elements ---
+            const convertBtn = document.getElementById('convertBtn');
+            const fileInput = document.getElementById('fileInput');
+            const fileNameDisplay = document.getElementById('fileNameDisplay');
+            const inputArea = document.getElementById('inputArea');
+            const outputArea = document.getElementById('outputArea');
+            const errorBanner = document.getElementById('errorBanner');
+            const errorMessage = document.getElementById('errorMessage');
+            const inputPlaceholder = document.getElementById('inputPlaceholder');
+            
+            // Action Buttons
+            const clearInputBtn = document.getElementById('clearInputBtn');
+            const pasteBtn = document.getElementById('pasteBtn');
+            const copyOutputBtn = document.getElementById('copyOutputBtn');
+            const copyText = document.getElementById('copyText');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const formatJsonBtn = document.getElementById('formatJsonBtn');
+            const minifyJsonBtn = document.getElementById('minifyJsonBtn');
+
+            // State
+            let currentFileBuffer = null;
+
+            // --- Event Listeners ---
+
+            // Update UI based on selection
+            conversionTypeInput.addEventListener('change', () => {
+                resetUI();
+                const mode = conversionTypeInput.value;
+                const isExcelInput = mode === 'excel-to-json';
+                const isExcelOutput = mode === 'json-to-excel';
+                
+                if (isExcelInput) {
+                    inputArea.placeholder = "Upload an .xlsx or .xls file. Text input is disabled for binary formats.";
+                    inputArea.setAttribute('readonly', true);
+                    inputArea.classList.add('text-slate-600');
+                } else {
+                    inputArea.placeholder = "Paste your data here or upload a file...";
+                    inputArea.removeAttribute('readonly');
+                    inputArea.classList.remove('text-slate-600');
+                }
+
+                if (isExcelOutput) {
+                    outputArea.placeholder = "Click Convert to generate a downloadable .xlsx file.";
+                } else {
+                    outputArea.placeholder = "Result will appear here...";
+                }
+            });
+
+            // File Upload
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                fileNameDisplay.textContent = file.name;
+                inputPlaceholder.style.display = 'none';
+
+                const reader = new FileReader();
+
+                if (file.name.endsWith('.json') || file.name.endsWith('.csv')) {
+                    reader.onload = (e) => {
+                        inputArea.value = e.target.result;
+                        currentFileBuffer = null;
+                    };
+                    reader.readAsText(file);
+                } 
+                else if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                    reader.onload = (e) => {
+                        currentFileBuffer = e.target.result;
+                        inputArea.value = `[Binary Data Loaded: ${file.name}]\nReady to convert...`;
+                    };
+                    reader.readAsArrayBuffer(file);
+                } else {
+                    showError("Unsupported file format. Please use JSON, CSV, or Excel.");
+                    fileInput.value = '';
+                }
+            });
+
+            // Clear
+            clearInputBtn.addEventListener('click', () => {
+                inputArea.value = '';
+                currentFileBuffer = null;
+                fileInput.value = '';
+                fileNameDisplay.textContent = 'Upload File (Optional)';
+                inputPlaceholder.style.display = 'flex';
+                inputArea.focus();
+            });
+
+            // Paste
+            pasteBtn.addEventListener('click', async () => {
+                try {
+                    const text = await navigator.clipboard.readText();
+                    inputArea.value = text;
+                    inputPlaceholder.style.display = 'none';
+                } catch (err) {
+                    showError("Failed to read clipboard. Please allow permissions.");
+                }
+            });
+
+            // Copy
+            copyOutputBtn.addEventListener('click', () => {
+                if (!outputArea.value) return;
+                navigator.clipboard.writeText(outputArea.value);
+                
+                const originalContent = copyOutputBtn.innerHTML;
+                copyOutputBtn.innerHTML = `<i class="ph-fill ph-check-circle text-white"></i> <span class="text-white">Copied!</span>`;
+                copyOutputBtn.classList.replace('bg-slate-800', 'bg-emerald-500');
+                copyOutputBtn.classList.replace('border-slate-700', 'border-emerald-400');
+                
+                setTimeout(() => {
+                    copyOutputBtn.innerHTML = originalContent;
+                    copyOutputBtn.classList.replace('bg-emerald-500', 'bg-slate-800');
+                    copyOutputBtn.classList.replace('border-emerald-400', 'border-slate-700');
+                }, 2000);
+            });
+
+            // Download Text Result
+            downloadBtn.addEventListener('click', () => {
+                if (!outputArea.value || conversionTypeInput.value === 'json-to-excel') return;
+                const mode = conversionTypeInput.value;
+                const extension = mode.includes('json') ? 'json' : 'csv';
+                const blob = new Blob([outputArea.value], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `converted_data.${extension}`;
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+
+            // Format JSON
+            formatJsonBtn.addEventListener('click', () => {
+                try {
+                    const parsed = JSON.parse(outputArea.value);
+                    outputArea.value = JSON.stringify(parsed, null, 2);
+                } catch (e) {
+                    showError("Invalid JSON in output. Cannot format.");
+                }
+            });
+
+            // Minify JSON
+            minifyJsonBtn.addEventListener('click', () => {
+                try {
+                    const parsed = JSON.parse(outputArea.value);
+                    outputArea.value = JSON.stringify(parsed);
+                } catch (e) {
+                    showError("Invalid JSON in output. Cannot minify.");
+                }
+            });
+
+            // Main Conversion Logic
+            convertBtn.addEventListener('click', () => {
+                hideError();
+                const mode = conversionTypeInput.value;
+                
+                try {
+                    if (mode === 'json-to-csv') {
+                        processJsonToCsv();
+                    } else if (mode === 'csv-to-json') {
+                        processCsvToJson();
+                    } else if (mode === 'json-to-excel') {
+                        processJsonToExcel();
+                    } else if (mode === 'excel-to-json') {
+                        processExcelToJson();
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showError(err.message);
+                }
+            });
+
+            // --- Conversion Functions ---
+
+            function processJsonToCsv() {
+                const data = parseInputJson();
+                if (!data || !Array.isArray(data) || data.length === 0) throw new Error("Input must be a non-empty JSON array.");
+
+                const headers = Object.keys(data[0]);
+                const csvRows = [headers.join(',')];
+
+                data.forEach(row => {
+                    const values = headers.map(header => {
+                        const val = row[header] === null || row[header] === undefined ? '' : row[header];
+                        const escaped = String(val).replace(/"/g, '""');
+                        return `"${escaped}"`;
+                    });
+                    csvRows.push(values.join(','));
+                });
+
+                outputArea.value = csvRows.join('\n');
+                toggleJsonTools(false);
+            }
+
+            function processCsvToJson() {
+                const csv = inputArea.value.trim();
+                if (!csv) throw new Error("Input CSV is empty.");
+                
+                const lines = csv.split(/\r\n|\n/).filter(line => line.trim() !== '');
+                if (lines.length < 2) throw new Error("CSV must contain headers and at least one row.");
+
+                const headers = parseCSVLine(lines[0]);
+                const result = [];
+
+                for (let i = 1; i < lines.length; i++) {
+                    const currentLine = parseCSVLine(lines[i]);
+                    const obj = {};
+                    headers.forEach((header, index) => {
+                        obj[header] = currentLine[index] || '';
+                    });
+                    result.push(obj);
+                }
+
+                outputArea.value = JSON.stringify(result, null, 2);
+                toggleJsonTools(true);
+            }
+
+            function processJsonToExcel() {
+                const data = parseInputJson();
+                if (!data || !Array.isArray(data)) throw new Error("Input must be a JSON array.");
+
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.json_to_sheet(data);
+                XLSX.utils.book_append_sheet(wb, ws, "Data");
+
+                const timestamp = new Date().toISOString().slice(0,19).replace(/[-T:]/g,"");
+                XLSX.writeFile(wb, `dataflow_export_${timestamp}.xlsx`);
+
+                outputArea.value = `Success! Generated ${data.length} rows. Download started.`;
+                toggleJsonTools(false);
+            }
+
+            function processExcelToJson() {
+                if (!currentFileBuffer) throw new Error("Please upload an Excel file first.");
+                
+                const workbook = XLSX.read(currentFileBuffer, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                
+                const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+                
+                outputArea.value = JSON.stringify(jsonData, null, 2);
+                toggleJsonTools(true);
+            }
+
+            // --- Helpers ---
+
+            function parseInputJson() {
+                const raw = inputArea.value.trim();
+                if (!raw) throw new Error("Input is empty.");
+                try {
+                    return JSON.parse(raw);
+                } catch (e) {
+                    throw new Error("Invalid JSON syntax.");
+                }
+            }
+
+            function parseCSVLine(text) {
+                const result = [];
+                let start = 0;
+                let inQuotes = false;
+                for (let i = 0; i < text.length; i++) {
+                    if (text[i] === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (text[i] === ',' && !inQuotes) {
+                        let val = text.substring(start, i);
+                        if (val.startsWith('"') && val.endsWith('"')) {
+                            val = val.slice(1, -1).replace(/""/g, '"');
+                        }
+                        result.push(val.trim());
+                        start = i + 1;
+                    }
+                }
+                let val = text.substring(start);
+                if (val.startsWith('"') && val.endsWith('"')) {
+                    val = val.slice(1, -1).replace(/""/g, '"');
+                }
+                result.push(val.trim());
+                return result;
+            }
+
+            function showError(msg) {
+                errorMessage.textContent = msg;
+                errorBanner.classList.remove('hidden');
+                errorBanner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            function hideError() {
+                errorBanner.classList.add('hidden');
+            }
+
+            function resetUI() {
+                outputArea.value = '';
+                hideError();
+                toggleJsonTools(false);
+            }
+
+            function toggleJsonTools(show) {
+                if (show) {
+                    formatJsonBtn.classList.remove('hidden');
+                    minifyJsonBtn.classList.remove('hidden');
+                } else {
+                    formatJsonBtn.classList.add('hidden');
+                    minifyJsonBtn.classList.add('hidden');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
