@@ -665,7 +665,25 @@
             // --- Conversion Functions ---
 
             function processJsonToCsv() {
-                const data = parseInputJson();
+                let data = parseInputJson();
+                
+                // SMART FIX: Handle single objects by auto-detecting dataset arrays
+                // If input is a single object (not an array), check if it contains a single array property
+                // (e.g. { "employees": [...] }). If so, use that array for conversion.
+                if (!Array.isArray(data) && typeof data === 'object' && data !== null) {
+                    const keys = Object.keys(data);
+                    const arrayKeys = keys.filter(k => Array.isArray(data[k]));
+                    
+                    if (arrayKeys.length === 1) {
+                        // Heuristic: Only one array found (like 'employees'). Assume that's the data.
+                        data = data[arrayKeys[0]];
+                        console.log(`Auto-detected and converted array key: "${arrayKeys[0]}"`);
+                    } else {
+                        // No array or ambiguous multiple arrays. Wrap the whole object as one row.
+                        data = [data];
+                    }
+                }
+
                 if (!data || !Array.isArray(data) || data.length === 0) throw new Error("Input must be a non-empty JSON array.");
 
                 const headers = Object.keys(data[0]);
@@ -673,7 +691,16 @@
 
                 data.forEach(row => {
                     const values = headers.map(header => {
-                        const val = row[header] === null || row[header] === undefined ? '' : row[header];
+                        let val = row[header];
+                        
+                        // Handle nulls/undefined
+                        if (val === null || val === undefined) return '';
+                        
+                        // If value is nested object/array, stringify it to keep data in CSV cell
+                        if (typeof val === 'object') {
+                            val = JSON.stringify(val);
+                        }
+                        
                         const escaped = String(val).replace(/"/g, '""');
                         return `"${escaped}"`;
                     });
@@ -708,7 +735,19 @@
             }
 
             function processJsonToExcel() {
-                const data = parseInputJson();
+                let data = parseInputJson();
+
+                // Apply same smart detection for Excel
+                if (!Array.isArray(data) && typeof data === 'object' && data !== null) {
+                    const keys = Object.keys(data);
+                    const arrayKeys = keys.filter(k => Array.isArray(data[k]));
+                    if (arrayKeys.length === 1) {
+                        data = data[arrayKeys[0]];
+                    } else {
+                        data = [data];
+                    }
+                }
+
                 if (!data || !Array.isArray(data)) throw new Error("Input must be a JSON array.");
 
                 const wb = XLSX.utils.book_new();
