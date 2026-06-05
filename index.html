@@ -420,13 +420,14 @@ In this guide, we’ll explore how to handle large-scale data transformation eff
 
 The Problem with Traditional Online Converters
 When you upload a file to a standard conversion website, the data travels to a remote server, gets processed, and is sent back to you. This architecture introduces three major bottlenecks:
+<ol>
+<li>Network Latency: Uploading a 50MB file takes time, especially on asymmetric internet connections.</li>
 
-Network Latency: Uploading a 50MB file takes time, especially on asymmetric internet connections.
+<li>Server Timeouts: Free tools usually kill processes that take more than a few seconds to save server costs.</li>
 
-Server Timeouts: Free tools usually kill processes that take more than a few seconds to save server costs.
-
-Data Privacy Risks: Your sensitive datasets, API logs, or user metrics are temporarily stored on third-party infrastructure.
-
+<li>Data Privacy Risks: Your sensitive datasets, API logs, or user metrics are temporarily stored on third-party infrastructure.</li>
+</ol>
+                        
 The Modern Solution: In-Browser JavaScript Parsing
 The most efficient way to bypass these limits is to leverage your own computer's hardware. By utilizing HTML5 File Reader APIs and client-side JavaScript streaming libraries, web utilities can now process data directly inside your browser.
 
@@ -434,12 +435,13 @@ Why Client-Side is Superior: Since your local CPU and RAM handle the logic, a 10
 
 3 Best Practices for Formatting Large JSON Data
 Before converting your hierarchical JSON data into a flat CSV layout, keep these tips in mind:
+<ul>
+<li>Flatten Nested Objects: Ensure deeply nested JSON keys are mapped correctly (e.g., user.address.zipcode should become a clean column header).</li>
 
-Flatten Nested Objects: Ensure deeply nested JSON keys are mapped correctly (e.g., user.address.zipcode should become a clean column header).
+<li>Handle Null Values Consistently: Decide whether missing fields should be empty strings or labeled as null to avoid breaking your SQL imports.</li>
 
-Handle Null Values Consistently: Decide whether missing fields should be empty strings or labeled as null to avoid breaking your SQL imports.
-
-Verify Encoding: Always output your final CSV in UTF-8 encoding to preserve special characters and non-English scripts.
+</li>Verify Encoding: Always output your final CSV in UTF-8 encoding to preserve special characters and non-English scripts.</li>
+</ul>
                         </p>
                     </div>
                 </div>
@@ -457,29 +459,30 @@ Method 1: The Native Excel Power Query (Complex)
 For advanced users, Excel offers a built-in data connector:
 
 Open Excel, go to the Data tab.
+<ol>
+<li>Click Get Data > From File > From JSON.</li>
 
-1. Click Get Data > From File > From JSON.
+<li>Select your file. Excel will open the Power Query Editor.</li>
 
-2. Select your file. Excel will open the Power Query Editor.
+<li>You will need to click "Into Table" and manually expand the records and lists to flatten the nested data.</li>
 
-3. You will need to click "Into Table" and manually expand the records and lists to flatten the nested data.
-
-4. Click Close & Load to view it on your sheet.
-
+<li>Click Close & Load to view it on your sheet.</li>
+</ol>
 Drawback: This method takes dozens of clicks and requires a steep learning curve for non-developers.
 
 Method 2: Instant Client-Side Conversion (Fastest)
 If you need a zero-configuration solution that formats your data perfectly in under three seconds, using a dedicated web converter is the best approach:
+<ol>
+<li>Copy your raw JSON data string.</li>
 
-1. Copy your raw JSON data string.
+<li>Navigate to a secure client-side converter like DataFlow Pro.</li>
 
-2. Navigate to a secure client-side converter like DataFlow Pro.
+<li>Paste the text or drag-and-drop your .json file into the interface.</li>
 
-3. Paste the text or drag-and-drop your .json file into the interface.
+<li>Select JSON to Excel (.xlsx) or JSON to CSV.</li>
 
-4. Select JSON to Excel (.xlsx) or JSON to CSV.
-
-5. Hit Convert and download your file.
+<li>Hit Convert and download your file.</li>
+</ol>
 
 When you open the downloaded file, your nested JSON properties will automatically be mapped to clean, filterable Excel column headers without any manual layout adjustments.
 
