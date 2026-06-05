@@ -407,89 +407,120 @@
         <section class="max-w-4xl mx-auto w-full px-4 pb-16">
             <h2 class="text-2xl font-bold text-white mb-6 text-center">Developer Resources & Guides</h2>
             
-            <div class="space-y-4" itemscope itemtype="https://schema.org/FAQPage">
-                
-                <!-- Article 1 -->
-                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
-                    <h3 class="text-lg font-semibold text-white mb-2" itemprop="name">How to Convert Large JSON Files to CSV Without Crashing Your Browser</h3>
-                    <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-                        <p class="text-slate-400" itemprop="text">
-                            Handling massive datasets can be a nightmare for developers and data analysts. Most online converters impose strict file size limits (usually 5MB to 10MB) or crash mid-process due to server timeouts. Worse, uploading confidential corporate data to an unknown server poses a massive security risk.
+             <div class="max-w-3xl mx-auto space-y-8">
 
-In this guide, we’ll explore how to handle large-scale data transformation efficiently and securely using modern client-side technology.
+        <!-- Article 1 -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-lg" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+            
+            <h3 class="text-xl font-bold text-white mb-4" itemprop="name">How to Convert Large JSON Files to CSV Without Crashing Your Browser</h3>
 
-The Problem with Traditional Online Converters
-When you upload a file to a standard conversion website, the data travels to a remote server, gets processed, and is sent back to you. This architecture introduces three major bottlenecks:</p>
-<ol>
-<li>Network Latency: Uploading a 50MB file takes time, especially on asymmetric internet connections.</li>
+            <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+                <!-- Pindahkan itemprop text ke div wrapper agar mencakup list -->
+                <div itemprop="text" class="space-y-4 text-slate-400">
+                    
+                    <p>
+                        Handling massive datasets can be a nightmare for developers and data analysts. Most online converters impose strict file size limits (usually 5MB to 10MB) or crash mid-process due to server timeouts. Worse, uploading confidential corporate data to an unknown server poses a massive security risk.
+                    </p>
 
-<li>Server Timeouts: Free tools usually kill processes that take more than a few seconds to save server costs.</li>
+                    <p>
+                        In this guide, we’ll explore how to handle large-scale data transformation efficiently and securely using modern client-side technology.
+                    </p>
 
-<li>Data Privacy Risks: Your sensitive datasets, API logs, or user metrics are temporarily stored on third-party infrastructure.</li>
-</ol>
- <p class="text-slate-400" itemprop="text">                        
-The Modern Solution: In-Browser JavaScript Parsing
-The most efficient way to bypass these limits is to leverage your own computer's hardware. By utilizing HTML5 File Reader APIs and client-side JavaScript streaming libraries, web utilities can now process data directly inside your browser.
+                    <h4 class="text-white font-semibold pt-2">The Problem with Traditional Online Converters</h4>
+                    <p>
+                        When you upload a file to a standard conversion website, the data travels to a remote server, gets processed, and is sent back to you. This architecture introduces three major bottlenecks:
+                    </p>
 
-Why Client-Side is Superior: Since your local CPU and RAM handle the logic, a 100MB conversion that would crash a standard server-based tool can be completed in seconds on your device—with zero bytes transmitted over the internet.</p>
+                    <!-- List Ordered (OL) -->
+                    <ol class="list-decimal list-inside space-y-2 ml-4 marker:text-sky-500">
+                        <li><strong class="text-slate-300">Network Latency:</strong> Uploading a 50MB file takes time, especially on asymmetric internet connections.</li>
+                        <li><strong class="text-slate-300">Server Timeouts:</strong> Free tools usually kill processes that take more than a few seconds to save server costs.</li>
+                        <li><strong class="text-slate-300">Data Privacy Risks:</strong> Your sensitive datasets, API logs, or user metrics are temporarily stored on third-party infrastructure.</li>
+                    </ol>
 
-3 Best Practices for Formatting Large JSON Data
-Before converting your hierarchical JSON data into a flat CSV layout, keep these tips in mind:
-<ul>
-<li>Flatten Nested Objects: Ensure deeply nested JSON keys are mapped correctly (e.g., user.address.zipcode should become a clean column header).</li>
+                    <h4 class="text-white font-semibold pt-2">The Modern Solution: In-Browser JavaScript Parsing</h4>
+                    <p>
+                        The most efficient way to bypass these limits is to leverage your own computer's hardware. By utilizing HTML5 File Reader APIs and client-side JavaScript streaming libraries, web utilities can now process data directly inside your browser.
+                    </p>
+                    <p>
+                        <strong>Why Client-Side is Superior:</strong> Since your local CPU and RAM handle the logic, a 100MB conversion that would crash a standard server-based tool can be completed in seconds on your device—with zero bytes transmitted over the internet.
+                    </p>
 
-<li>Handle Null Values Consistently: Decide whether missing fields should be empty strings or labeled as null to avoid breaking your SQL imports.</li>
+                    <h4 class="text-white font-semibold pt-2">3 Best Practices for Formatting Large JSON Data</h4>
+                    <p>
+                        Before converting your hierarchical JSON data into a flat CSV layout, keep these tips in mind:
+                    </p>
 
-</li>Verify Encoding: Always output your final CSV in UTF-8 encoding to preserve special characters and non-English scripts.</li>
-</ul>
+                    <!-- List Unordered (UL) -->
+                    <ul class="list-disc list-inside space-y-2 ml-4 marker:text-sky-500">
+                        <li><strong class="text-slate-300">Flatten Nested Objects:</strong> Ensure deeply nested JSON keys are mapped correctly (e.g., user.address.zipcode should become a clean column header).</li>
+                        <li><strong class="text-slate-300">Handle Null Values Consistently:</strong> Decide whether missing fields should be empty strings or labeled as null to avoid breaking your SQL imports.</li>
+                        <!-- PERBAIKAN BUG DI SINI: Menghapus </li> ganda dan menambahkan <li> pembuka -->
+                        <li><strong class="text-slate-300">Verify Encoding:</strong> Always output your final CSV in UTF-8 encoding to preserve special characters and non-English scripts.</li>
+                    </ul>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Article 2 -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-lg" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+            
+            <h3 class="text-xl font-bold text-white mb-4" itemprop="name">Step-by-Step Guide: How to Format and Open JSON Files in Excel Correctly</h3>
+
+            <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+                <div itemprop="text" class="space-y-4 text-slate-400">
+                    
+                    <p>
+                        Microsoft Excel is the gold standard for data analysis, but it has one famous weakness: it hates raw JSON. Because JSON (JavaScript Object Notation) uses nested, hierarchical trees and Excel relies on flat rows and columns, opening a .json file directly usually results in a single, unreadable wall of text.
+                    </p>
+                    
+                    <p>
+                        If you need to turn API responses or database dumps into clean, human-readable spreadsheets, here are the most effective ways to do it.
+                    </p>
+
+                    <h4 class="text-white font-semibold pt-2">Method 1: The Native Excel Power Query (Complex)</h4>
+                    <p>For advanced users, Excel offers a built-in data connector. Follow these steps:</p>
+
+                    <ol class="list-decimal list-inside space-y-2 ml-4 marker:text-sky-500">
+                        <li>Open Excel, go to the <strong>Data</strong> tab.</li>
+                        <li>Click <strong>Get Data > From File > From JSON</strong>.</li>
+                        <li>Select your file. Excel will open the Power Query Editor.</li>
+                        <li>You will need to click "Into Table" and manually expand the records and lists to flatten the nested data.</li>
+                        <li>Click <strong>Close & Load</strong> to view it on your sheet.</li>
+                    </ol>
+
+                    <div class="bg-slate-800/50 p-3 rounded border-l-4 border-yellow-500">
+                        <p class="text-sm text-slate-300"><strong>Drawback:</strong> This method takes dozens of clicks and requires a steep learning curve for non-developers.</p>
+                    </div>
+
+                    <h4 class="text-white font-semibold pt-4">Method 2: Instant Client-Side Conversion (Fastest)</h4>
+                    <p>If you need a zero-configuration solution that formats your data perfectly in under three seconds, using a dedicated web converter is the best approach:</p>
+
+                    <ol class="list-decimal list-inside space-y-2 ml-4 marker:text-sky-500">
+                        <li>Copy your raw JSON data string.</li>
+                        <li>Navigate to a secure client-side converter like DataFlow Pro.</li>
+                        <li>Paste the text or drag-and-drop your .json file into the interface.</li>
+                        <li>Select JSON to Excel (.xlsx) or JSON to CSV.</li>
+                        <li>Hit Convert and download your file.</li>
+                    </ol>
+
+                    <p>
+                        When you open the downloaded file, your nested JSON properties will automatically be mapped to clean, filterable Excel column headers without any manual layout adjustments.
+                    </p>
+
+                    <div class="mt-4 pt-4 border-t border-slate-800">
+                        <h5 class="text-white font-medium">Key Takeaway</h5>
+                        <p class="text-sm">
+                            While Excel is incredibly powerful, preparing JSON data before importing it saves hours of troubleshooting broken formatting and mismatched rows.
                         </p>
                     </div>
+
                 </div>
+            </div>
+        </div>
 
-                <!-- Article 2 -->
-                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
-                    <h3 class="text-lg font-semibold text-white mb-2" itemprop="name">Step-by-Step Guide: How to Format and Open JSON Files in Excel Correctly</h3>
-                    <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-                        <p class="text-slate-400" itemprop="text">
-                            Microsoft Excel is the gold standard for data analysis, but it has one famous weakness: it hates raw JSON. Because JSON (JavaScript Object Notation) uses nested, hierarchical trees and Excel relies on flat rows and columns, opening a .json file directly usually results in a single, unreadable wall of text.
-
-If you need to turn API responses or database dumps into clean, human-readable spreadsheets, here are the most effective ways to do it.
-
-Method 1: The Native Excel Power Query (Complex)
-For advanced users, Excel offers a built-in data connector:
-
-Open Excel, go to the Data tab.
-<ol>
-<li>Click Get Data > From File > From JSON.</li>
-
-<li>Select your file. Excel will open the Power Query Editor.</li>
-
-<li>You will need to click "Into Table" and manually expand the records and lists to flatten the nested data.</li>
-
-<li>Click Close & Load to view it on your sheet.</li>
-</ol>
-Drawback: This method takes dozens of clicks and requires a steep learning curve for non-developers.
-
-Method 2: Instant Client-Side Conversion (Fastest)
-If you need a zero-configuration solution that formats your data perfectly in under three seconds, using a dedicated web converter is the best approach:
-<ol>
-<li>Copy your raw JSON data string.</li>
-
-<li>Navigate to a secure client-side converter like DataFlow Pro.</li>
-
-<li>Paste the text or drag-and-drop your .json file into the interface.</li>
-
-<li>Select JSON to Excel (.xlsx) or JSON to CSV.</li>
-
-<li>Hit Convert and download your file.</li>
-</ol>
-
-When you open the downloaded file, your nested JSON properties will automatically be mapped to clean, filterable Excel column headers without any manual layout adjustments.
-
-Key Takeaway
-While Excel is incredibly powerful, preparing JSON data before importing it saves hours of troubleshooting broken formatting and mismatched rows.
-                    </div>
-                </div>
+    </div>
 
             </div>
         </section>
